@@ -198,3 +198,4 @@ if __name__ == "__main__":
         pywikibot.Site(),
         STORAGE_PAGE
     ).run()
+
