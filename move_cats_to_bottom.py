@@ -25,22 +25,6 @@ class MoveCatsBot:
         self.api_url = site.protocol() + "://" + site.hostname() + site.apipath()
         self.reference_page_title = reference_page_title
     
-    def get_page_start(self) -> str:
-        '''
-        Returns the page that this bot is supposed to start editing from,
-        according to this bot's reference page. 
-        '''
-        page = pywikibot.Page(self.site, self.reference_page_title)
-        return page.text.split('\n')[0]
-    
-    def set_page_start(self, new_start: str) -> None:
-        '''
-        Sets the page that this bot will start from next to the string given.
-        '''
-        page = pywikibot.Page(self.site, self.reference_page_title)
-        page.text = new_start
-        page.save("Store new page from last execution.")
-    
     def pages_from(self, start_point: str) -> "page generator":
         '''
         Returns a generator with 25 pages starting from
@@ -61,6 +45,55 @@ class MoveCatsBot:
 
         pages = data["query"]["allpages"]
         return pages
+
+    def get_page_start(self) -> str:
+        '''
+        Returns the page that this bot is supposed to start editing from,
+        according to this bot's reference page. 
+        '''
+        page = pywikibot.Page(self.site, self.reference_page_title)
+        return page.text.split('\n')[0]
+    
+    def set_page_start(self, new_start: str) -> None:
+        '''
+        Sets the page that this bot will start from next to the string given.
+        '''
+        page = pywikibot.Page(self.site, self.reference_page_title)
+        page.text = new_start
+        page.save("Store new page from last execution.")
+
+    def run(self) -> None:
+        '''
+        Runs the bot on a certain number of pages.
+        Records the last page the bot saw on a certain Mediawiki page.
+        '''
+        start_page_title = self.get_page_start()
+        last_page_seen = ""
+
+        pages_to_run = self.pages_from(start_page_title)
+
+        for page in pages_to_run:
+            last_page_seen = page['title']
+            self.move_cats(last_page_seen)
+        
+        if len(list(pages_to_run)) < PAGES_TO_GO_THROUGH:
+            # if we hit the end, then loop back to beginning
+            self.set_page_start("")
+        else:
+            # otherewise, just record the last page seen
+            self.set_page_start(last_page_seen)
+
+
+
+
+
+
+
+
+
+
+
+
     
     def split_into_cats(self, line: str) -> [str]:
         """
@@ -170,27 +203,6 @@ class MoveCatsBot:
             
             # save edits
             page.save("Add all categories to the bottom of the page. ")
-
-    def run(self) -> None:
-        '''
-        Runs the bot on a certain number of pages.
-        Records the last page the bot saw on a certain Mediawiki page.
-        '''
-        start_page_title = self.get_page_start()
-        last_page_seen = ""
-
-        pages_to_run = self.pages_from(start_page_title)
-
-        for page in pages_to_run:
-            last_page_seen = page['title']
-            self.move_cats(last_page_seen)
-        
-        if len(list(pages_to_run)) < 25:
-            # if we hit the end, then loop back to beginning
-            self.set_page_start("")
-        else:
-            # otherewise, just record the last page seen
-            self.set_page_start(last_page_seen)
 
 
 if __name__ == "__main__":
