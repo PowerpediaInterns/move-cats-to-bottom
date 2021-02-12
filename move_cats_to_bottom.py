@@ -10,7 +10,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 PAGES_TO_GO_THROUGH = 25
 # the title of the page that stores the last page this bot has seen 
 # and where to pick up on a later execution
-STORAGE_PAGE = "CatMoverBotInfo"
+STORAGE_PAGE = "File:CatMoverBotInfo"
 
 
 class MoveCatsBot:
